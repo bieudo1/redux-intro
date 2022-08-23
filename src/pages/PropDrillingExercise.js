@@ -11,6 +11,7 @@ const RootComponent = (props) => {
   // eslint-disable-next-line
   const [products, setProducts] = useState([
     { id: "p1", title: "Product 1", price: 1999 },
+    // { id: "p3", title: "Product 3", price: 990 },
     { id: "p2", title: "Product 2", price: 999 },
   ]);
   // eslint-disable-next-line
@@ -21,6 +22,7 @@ const RootComponent = (props) => {
     ],
     totalPrice: 0,
   });
+  
 
   // Step 0 Read and understand the structure of the app
 
@@ -29,11 +31,35 @@ const RootComponent = (props) => {
   // Example newProduct = { id: "p1", title: "Product 1", price: 1999 }
   // The function will add one new product into the cart
 
+  const addProductToCart = (newProduct) => {
+    const newProductList = cart.products.map((cartProduct) => {
+      if (cartProduct.id === newProduct.id) {
+        cartProduct.qty += 1;
+        cartProduct.price += newProduct.price;
+      }
+      return cartProduct;
+    });
+    const newTotalPrice = cart.totalPrice + newProduct.price;
+    setCart({ products: newProductList, totalPrice: newTotalPrice });
+  };
 
   // Step 2
   // Write a function called removeProductFromCart() that takes a product object as an argument
   // Example removedProduct = { id: "p1", title: "Product 1", price: 1999 }
   // The function will remove one product from the cart. The min value of quantity is 0
+
+  const removeProductFromCart= (removedProduct) => {
+    let newTotalPrice = cart.totalPrice;
+    const newProductList = cart.products.map((cartProduct) => {
+      if (cartProduct.id === removedProduct.id && cartProduct.qty > 0) {
+        cartProduct.qty -= 1;
+        cartProduct.price -= removedProduct.price;
+        newTotalPrice -= removedProduct.price;
+      }
+      return cartProduct;
+    });
+    setCart({ products: newProductList, totalPrice: newTotalPrice });
+  };
 
   // Step 3
   // Pass the functions to the product components to handle the click event of the Add/Remove buttons
@@ -41,9 +67,7 @@ const RootComponent = (props) => {
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
-        RootComponent {`({`}
-        <Box component="span" sx={{ color: "warning.main" }}>{Object.keys(props).join(", ")}</Box>
-        {`})`}
+        RootComponent
       </Typography>
       <Box sx={{ textAlign: "start" }}>
         <ReactJson
@@ -57,10 +81,10 @@ const RootComponent = (props) => {
       </Box>
       <Grid container spacing={2} p="1rem">
         <Grid item md={6}>
-          <ProductPage products={products} />
+          <ProductPage products={products} addProductToCart={addProductToCart} removeProductFromCart={removeProductFromCart} />
         </Grid>
         <Grid item md={6}>
-          <CartPage cart={cart} />
+          <CartPage cart={cart}/>
         </Grid>
       </Grid>
     </WrapperBox>
@@ -71,17 +95,14 @@ const ProductPage = (props) => {
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
-
-        Product Page {`({`}
-        <Box component="span" sx={{ color: "warning.main" }}>{Object.keys(props).join(", ")}</Box>
-        {`})`}
+        Product Page
       </Typography>
       <Grid container spacing={2} p="1rem">
         <Grid item sm={6}>
-          <ProductOne product={props.products[0]} />
+          <ProductOne product={props.products[0]} addProductToCart = {props.addProductToCart} removeProductFromCart={props.removeProductFromCart}/>
         </Grid>
         <Grid item sm={6}>
-          <ProductTwo product={props.products[1]} />
+          <ProductTwo product={props.products[1]} addProductToCart = {props.addProductToCart} removeProductFromCart={props.removeProductFromCart}/>
         </Grid>
       </Grid>
     </WrapperBox>
@@ -92,9 +113,7 @@ const CartPage = (props) => {
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
-        Cart Page {`({`}
-        <Box component="span" sx={{ color: "warning.main" }}>{Object.keys(props).join(", ")}</Box>
-        {`})`}
+        Cart Page
       </Typography>
       <Grid container spacing={2} p="1rem">
         <Grid item md={6}>
@@ -115,9 +134,7 @@ const ProductOne = (props) => {
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
-        {props.product.title} {`({`}
-        <Box component="span" sx={{ color: "warning.main" }}>{Object.keys(props).join(", ")}</Box>
-        {`})`}
+        {props.product.title}
       </Typography >
       <Grid container justifyContent="center">
         <Grid item xs={8}>
@@ -126,10 +143,10 @@ const ProductOne = (props) => {
         </Grid>
         <Grid item xs={8} >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button variant="success" sx={{ width: "5rem" }} >
+            <Button variant="success"   sx={{ width: "5rem" }} onClick={(e)=>props.addProductToCart(props.product)} >
               Add
             </Button>
-            <Button variant="error" sx={{ width: "5rem" }}>
+            <Button variant="error" sx={{ width: "5rem" }} onClick={(e)=>props.removeProductFromCart(props.product)} >
               Remove
             </Button>
           </div>
@@ -144,9 +161,7 @@ const ProductTwo = (props) => {
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
-        {props.product.title} {`({`}
-        <Box component="span" sx={{ color: "warning.main" }}>{Object.keys(props).join(", ")}</Box>
-        {`})`}
+        {props.product.title}
       </Typography>
       <Grid container justifyContent="center">
         <Grid item xs={8}>
@@ -155,10 +170,10 @@ const ProductTwo = (props) => {
         </Grid>
         <Grid item xs={8} >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button variant="success" size="sm" style={{ width: "5rem" }}>
+            <Button variant="success" size="sm" style={{ width: "5rem" }} onClick={(e)=>props.addProductToCart(props.product)}>
               Add
             </Button>
-            <Button variant="error" size="sm" style={{ width: "5rem" }}>
+            <Button variant="error" size="sm" style={{ width: "5rem" }}  onClick={(e)=>props.removeProductFromCart(props.product)}>
               Remove
             </Button>
           </div>
@@ -177,7 +192,7 @@ const CartProductOne = (props) => {
         {`})`}
       </Typography>
       <Box >
-        <Typography p="0.5rem" variant="h6">Quantity: {props.product.qty}</Typography>
+      <Typography p="0.5rem" variant="h6">Quantity: {props.product.qty}</Typography>
         <Typography p="0.5rem" variant="h6">Price: 💵 {props.product.price}</Typography>
       </Box>
     </WrapperBox>
@@ -193,7 +208,7 @@ const CartProductTwo = (props) => {
         {`})`}
       </Typography >
       <Box>
-        <Typography p="0.5rem" variant="h6">Quantity: {props.product.qty}</Typography>
+      <Typography p="0.5rem" variant="h6">Quantity: {props.product.qty}</Typography>
         <Typography p="0.5rem" variant="h6">Price: 💵 {props.product.price}</Typography>
       </Box>
     </WrapperBox>
